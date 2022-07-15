@@ -5,14 +5,19 @@ import Elevator from './components/Elevator';
 import './App.scss';
 
 function App({ countOfFloors = 5, countOfElevators = 1 }) {
-    const [elevatorState, setElevatorState] = useState({
-        currentFloor: 1,
-        speed: 1,
-        stack: [],
-        heading: '',
-        isMoving: false,
-        isWaiting: false,
-    });
+    const [elevatorState, setElevatorState] = useState(
+        localStorage.getItem('elevatorState') === null
+            ? {
+                  currentFloor: 1,
+                  speed: 1,
+                  stack: [],
+                  heading: '',
+                  isMoving: false,
+                  isWaiting: false,
+              }
+            : JSON.parse(localStorage.getItem('elevatorState')),
+    );
+    console.log(elevatorState);
     const { currentFloor, speed, stack, heading, isMoving, isWaiting } =
         elevatorState;
     const setIsMoving = (value) => {
@@ -59,6 +64,16 @@ function App({ countOfFloors = 5, countOfElevators = 1 }) {
             }, speed * 1000 + 3000);
         }
     }, [isMoving]);
+    useEffect(() => {
+        return () => {
+            elevatorState.isMoving = false;
+            elevatorState.isWaiting = false;
+            localStorage.setItem(
+                'elevatorState',
+                JSON.stringify(elevatorState),
+            );
+        };
+    });
     if (stack.length > 0 && !isWaiting && !isMoving) {
         const headingFloor = stack[0];
         const speed = Math.abs(currentFloor - headingFloor);

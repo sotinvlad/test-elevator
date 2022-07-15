@@ -1,6 +1,13 @@
+import classNames from 'classnames';
 import addToStack from './../helpers/addToStack';
 
-const Buttons = ({ countOfButtons, setElevatorState, currentFloor }) => {
+const Buttons = ({
+    countOfButtons,
+    setElevatorState,
+    currentFloor,
+    stack,
+    isMoving,
+}) => {
     const onButtonClick = (id) => {
         if (currentFloor === countOfButtons - id) return;
         setElevatorState((prevState) => {
@@ -21,7 +28,20 @@ const Buttons = ({ countOfButtons, setElevatorState, currentFloor }) => {
                     onButtonClick(id);
                 }}>
                 <span className='Button__text'>{countOfButtons - id}</span>
-                <div className='Button__block'></div>
+                <div
+                    className={classNames(
+                        'Button__block',
+                        {
+                            'Button__block-instack': stack.includes(
+                                countOfButtons - id,
+                            ),
+                        },
+                        {
+                            'Button__block-next':
+                                countOfButtons - id === currentFloor &&
+                                isMoving,
+                        },
+                    )}></div>
             </div>
         ));
     return <div className='Buttons'>{buttons}</div>;

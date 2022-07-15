@@ -23,11 +23,23 @@ body,
     border-top: 1px solid gray;
     border-bottom: 1px solid gray;
     &__cabin {
+        position: relative;
         background-color: aquamarine;
         height: 150px;
         transition: margin-top 1s linear;
         &-waiting {
             animation: blink-animation 0.5s steps(5, start) infinite;
+        }
+        img {
+            position: absolute;
+            top: 50px;
+            left: 60px;
+        }
+        span {
+            position: absolute;
+            font-weight: bold;
+            top: 20px;
+            left: 72px;
         }
     }
 }
@@ -53,6 +65,14 @@ body,
         transition: all 0.3s ease-in-out;
         &:hover {
             background-color: rgba(127, 255, 212, 0.475);
+        }
+        &-instack {
+            border: 1px solid black;
+            background-color: orange;
+        }
+        &-next {
+            border: 1px solid black;
+            background-color: rgba(45, 119, 198, 0.551);
         }
     }
 }

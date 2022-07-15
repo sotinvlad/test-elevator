@@ -88,6 +88,8 @@ function App({ countOfFloors = 5, countOfElevators = 1 }) {
                 countOfButtons={countOfFloors}
                 setElevatorState={setElevatorState}
                 currentFloor={currentFloor}
+                isMoving={isMoving}
+                stack={stack}
             />
         </div>
     );

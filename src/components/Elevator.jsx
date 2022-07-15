@@ -1,5 +1,8 @@
 import classNames from 'classnames';
 
+import arrowUp from './../assets/up-arrow.png';
+import arrowDown from './../assets/down-arrow.png';
+
 const Elevator = ({
     countOfFloors,
     currentFloor = 5,
@@ -21,7 +24,11 @@ const Elevator = ({
                 className={classNames('Elevator__cabin', {
                     'Elevator__cabin-waiting': isWaiting,
                 })}
-                style={cabinStyle}></div>
+                style={cabinStyle}>
+                {heading > 0 && <img src={arrowUp} />}
+                {heading < 0 && <img src={arrowDown} />}
+                {isMoving && <span>{currentFloor}</span>}
+            </div>
         </div>
     );
 };

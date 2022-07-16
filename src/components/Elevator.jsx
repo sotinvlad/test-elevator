@@ -1,16 +1,33 @@
 import classNames from 'classnames';
+import { useEffect } from 'react';
 
 import arrowUp from './../assets/up-arrow.png';
 import arrowDown from './../assets/down-arrow.png';
 
 const Elevator = ({
     countOfFloors,
-    currentFloor = 5,
-    isWaiting = false,
-    isMoving = false,
+    currentFloor,
+    isWaiting,
+    isMoving,
     speed = 1,
     heading,
+    id,
+    setIsWaiting,
+    setIsMoving,
+    setHeading,
 }) => {
+    useEffect(() => {
+        if (isMoving) {
+            setTimeout(() => {
+                setIsWaiting(id, true);
+                setIsMoving(id, false);
+                setHeading(id, 0);
+            }, speed * 1000);
+            setTimeout(() => {
+                setIsWaiting(id, false);
+            }, speed * 1000 + 3000);
+        }
+    }, [isMoving]);
     let elevatorStyle = {
         height: `${countOfFloors * 150}px`,
     };

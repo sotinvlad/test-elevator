@@ -1,20 +1,22 @@
 import classNames from 'classnames';
-import addToStack from './../helpers/addToStack';
 
-const Buttons = ({
-    countOfButtons,
-    setElevatorState,
-    currentFloor,
-    stack,
-    isMoving,
-}) => {
+import isFloorInStack from '../helpers/isFloorInStack';
+import getIdOfNearestElevator from '../helpers/getIdOfNearestElevator';
+import isFloorNext from '../helpers/isFloorNext';
+import isElevatorOnThatFloor from '../helpers/isElevatorOnThatFloor';
+
+const Buttons = ({ countOfButtons, setElevatorState, elevatorState }) => {
     const onButtonClick = (id) => {
-        if (currentFloor === countOfButtons - id) return;
+        const numberOfButton = countOfButtons - id;
+        if (isElevatorOnThatFloor(elevatorState, numberOfButton)) return;
+        const indexOfElevator = getIdOfNearestElevator(
+            elevatorState,
+            numberOfButton,
+        );
         setElevatorState((prevState) => {
-            return {
-                ...prevState,
-                stack: addToStack(prevState.stack, countOfButtons - id),
-            };
+            let newState = [...prevState];
+            newState[indexOfElevator].stack.push(numberOfButton);
+            return newState;
         });
     };
 
@@ -32,14 +34,16 @@ const Buttons = ({
                     className={classNames(
                         'Button__block',
                         {
-                            'Button__block-instack': stack.includes(
+                            'Button__block-instack': isFloorInStack(
+                                elevatorState,
                                 countOfButtons - id,
                             ),
                         },
                         {
-                            'Button__block-next':
-                                countOfButtons - id === currentFloor &&
-                                isMoving,
+                            'Button__block-next': isFloorNext(
+                                elevatorState,
+                                countOfButtons - id,
+                            ),
                         },
                     )}></div>
             </div>

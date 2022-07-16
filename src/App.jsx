@@ -3,108 +3,119 @@ import { useState, useEffect } from 'react';
 import Buttons from './components/Buttons';
 import Elevator from './components/Elevator';
 import './App.scss';
+import getElevatorStateFromLocalStorage from './helpers/getElevatorStateFromLocalStorage';
+import getDefaultElevatorState from './helpers/getDefaultElevatorStorage';
 
-function App({ countOfFloors = 5, countOfElevators = 1 }) {
+function App({ countOfFloors = 7, countOfElevators = 4 }) {
+    const [elevators, setElevators] = useState();
     const [elevatorState, setElevatorState] = useState(
         localStorage.getItem('elevatorState') === null
-            ? {
-                  currentFloor: 1,
-                  speed: 1,
-                  stack: [],
-                  heading: '',
-                  isMoving: false,
-                  isWaiting: false,
-              }
-            : JSON.parse(localStorage.getItem('elevatorState')),
+            ? getDefaultElevatorState(countOfElevators)
+            : getElevatorStateFromLocalStorage(),
     );
-    console.log(elevatorState);
-    const { currentFloor, speed, stack, heading, isMoving, isWaiting } =
-        elevatorState;
-    const setIsMoving = (value) => {
+    const setIsMoving = (id, value) => {
         setElevatorState((prevState) => {
-            return {
-                ...prevState,
-                isMoving: value,
-            };
+            let newState = [...prevState];
+            newState[id].isMoving = value;
+            return newState;
         });
     };
-    const setIsWaiting = (value) => {
+    const setIsWaiting = (id, value) => {
         setElevatorState((prevState) => {
-            return {
-                ...prevState,
-                isWaiting: value,
-            };
+            let newState = [...prevState];
+            newState[id].isWaiting = value;
+            return newState;
         });
     };
-    const setCurrentFloor = (value) => {
+    const setCurrentFloor = (id, value) => {
         setElevatorState((prevState) => {
-            return {
-                ...prevState,
-                currentFloor: value,
-            };
+            let newState = [...prevState];
+            newState[id].currentFloor = value;
+            return newState;
         });
     };
-    const setHeading = (value) => {
+    const setHeading = (id, value) => {
         setElevatorState((prevState) => {
-            return {
-                ...prevState,
-                heading: value,
-            };
+            let newState = [...prevState];
+            newState[id].heading = value;
+            return newState;
         });
     };
-    useEffect(() => {
-        if (isMoving) {
-            setTimeout(() => {
-                setIsWaiting(true);
-                setIsMoving(false);
-                setHeading(0);
-            }, speed * 1000);
-            setTimeout(() => {
-                setIsWaiting(false);
-            }, speed * 1000 + 3000);
+    const setSpeed = (id, value) => {
+        setElevatorState((prevState) => {
+            let newState = [...prevState];
+            newState[id].speed = value;
+            return newState;
+        });
+    };
+    const setStack = (id, value) => {
+        setElevatorState((prevState) => {
+            let newState = [...prevState];
+            newState[id].stack = value;
+            return newState;
+        });
+    };
+    for (let i = 0; i < countOfElevators; i++) {
+        if (
+            elevatorState[i].stack.length > 0 &&
+            !elevatorState[i].isWaiting &&
+            !elevatorState[i].isMoving
+        ) {
+            const headingFloor = elevatorState[i].stack[0];
+            const speed = Math.abs(
+                elevatorState[i].currentFloor - headingFloor,
+            );
+            setSpeed(elevatorState[i].id, speed);
+            const newStack = [...elevatorState[i].stack];
+            newStack.shift();
+            setStack(elevatorState[i].id, newStack);
+            setHeading(
+                elevatorState[i].id,
+                headingFloor - elevatorState[i].currentFloor,
+            );
+            setIsMoving(elevatorState[i].id, true);
+            setCurrentFloor(elevatorState[i].id, headingFloor);
         }
-    }, [isMoving]);
+    }
+
     useEffect(() => {
         return () => {
-            elevatorState.isMoving = false;
-            elevatorState.isWaiting = false;
             localStorage.setItem(
                 'elevatorState',
                 JSON.stringify(elevatorState),
             );
         };
     });
-    if (stack.length > 0 && !isWaiting && !isMoving) {
-        const headingFloor = stack[0];
-        const speed = Math.abs(currentFloor - headingFloor);
-        setElevatorState((prevState) => {
-            prevState.stack.shift();
-            return {
-                speed: speed,
-                stack: prevState.stack,
-            };
-        });
-        setHeading(headingFloor - currentFloor);
-        setIsMoving(true);
-        setCurrentFloor(headingFloor);
-    }
-
+    useEffect(() => {
+        setElevators(
+            Array(countOfElevators)
+                .fill()
+                .map((e, id) => (
+                    <Elevator
+                        key={id}
+                        id={id}
+                        countOfFloors={countOfFloors}
+                        currentFloor={elevatorState[id].currentFloor}
+                        isWaiting={elevatorState[id].isWaiting}
+                        isMoving={elevatorState[id].isMoving}
+                        speed={elevatorState[id].speed}
+                        heading={elevatorState[id].heading}
+                        stack={elevatorState[id].stack}
+                        elevatorState={elevatorState}
+                        setIsWaiting={setIsWaiting}
+                        setIsMoving={setIsMoving}
+                        setHeading={setHeading}
+                    />
+                )),
+        );
+    }, [elevatorState]);
     return (
         <div className='App'>
-            <Elevator
-                countOfFloors={countOfFloors}
-                currentFloor={currentFloor}
-                isWaiting={isWaiting}
-                isMoving={isMoving}
-                speed={speed}
-                heading={heading}
-            />
+            {elevators}
             <Buttons
                 countOfButtons={countOfFloors}
                 setElevatorState={setElevatorState}
-                currentFloor={currentFloor}
-                isMoving={isMoving}
-                stack={stack}
+                elevatorState={elevatorState}
             />
         </div>
     );

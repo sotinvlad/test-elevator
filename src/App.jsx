@@ -79,6 +79,14 @@ function App({ countOfFloors = 7, countOfElevators = 4 }) {
     }
 
     useEffect(() => {
+        return () => {
+            localStorage.setItem(
+                'elevatorState',
+                JSON.stringify(elevatorState),
+            );
+        };
+    });
+    useEffect(() => {
         setElevators(
             Array(countOfElevators)
                 .fill()
